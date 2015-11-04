@@ -1,1 +1,3 @@
 # sodra
+
+Cassandra + Solr integration
