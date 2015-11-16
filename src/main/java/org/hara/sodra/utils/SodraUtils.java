@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.solr.common.SolrInputDocument;
 
 /**
  * @author Phani Chaitanya Vempaty
@@ -33,12 +32,13 @@ import org.apache.solr.common.SolrInputDocument;
  */
 public class SodraUtils {
 
-	public static final SolrInputDocument getSolrDocument() {
-		return null;
-	}
-
-	public static final void createSolrCoreDirs(Path solrHome, String indexName) throws IOException {
+	public static final Path getSolrCorePath(Path solrHome, String indexName) {
 		Path corePath = Paths.get(solrHome.toString(), indexName);
+		return corePath;
+	}
+	
+	public static final void createSolrCoreDirs(Path solrHome, String indexName) throws IOException {
+		Path corePath = getSolrCorePath(solrHome, indexName);
 		Files.createDirectory(corePath);
 		Path coreConfPath = Paths.get(corePath.toString(), "conf");
 		Path baseConfPath = Paths.get(solrHome.toString(), "configsets", "sodra_template_configs", "conf");

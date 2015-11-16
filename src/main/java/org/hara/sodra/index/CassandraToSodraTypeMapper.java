@@ -43,5 +43,5 @@ public class CassandraToSodraTypeMapper {
 		}
 		return "text_general";
 	}
-
+	
 }

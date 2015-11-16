@@ -19,6 +19,7 @@
 
 package org.hara.sodra.index;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import org.apache.cassandra.db.index.SecondaryIndexSearcher;
 import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.utils.concurrent.OpOrder.Group;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +51,18 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	private IPartitioner partitioner;
 
 	private CFMetaData metadata;
+	
+	private SodraServer sodraServer;
 
 	@Override
 	public void index(ByteBuffer rowKey, ColumnFamily cf) {
 		System.out.println("Getting index call");
 		DecoratedKey decorateKey = partitioner.decorateKey(rowKey);
+		try {
+			sodraServer.index(decorateKey, cf);
+		} catch (SolrServerException | IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -66,9 +75,10 @@ public class SodraIndex extends PerRowSecondaryIndex {
 		indexName = baseCfs.name;
 		partitioner = baseCfs.partitioner;
 		metadata = Schema.instance.getCFMetaData(baseCfs.keyspace.getName(), baseCfs.name);
+		sodraServer = new SodraServer(metadata);
 		try {
 			// do not create the index if it already exists ?
-			SodraServer.instance.createIndex(indexName, baseCfs.metadata.allColumns());
+			sodraServer.createIndex(indexName, baseCfs.metadata.allColumns());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -105,7 +115,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	@Override
 	public void removeIndex(ByteBuffer columnName) {
 		try {
-			SodraServer.instance.deleteIndex(indexName);
+			sodraServer.deleteIndex(indexName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

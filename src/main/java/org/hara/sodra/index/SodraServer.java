@@ -20,6 +20,7 @@
 package org.hara.sodra.index;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -32,15 +33,26 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ColumnDefinition;
+import org.apache.cassandra.cql3.CQL3Type;
+import org.apache.cassandra.db.Cell;
+import org.apache.cassandra.db.ColumnFamily;
+import org.apache.cassandra.db.DecoratedKey;
+import org.apache.cassandra.db.composites.CellName;
+import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.Int32Type;
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.request.CoreAdminRequest.Create;
 import org.apache.solr.client.solrj.request.CoreAdminRequest.Unload;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrInputDocument;
 import org.hara.sodra.utils.SodraUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -55,16 +67,24 @@ import org.w3c.dom.NodeList;
  */
 public class SodraServer {
 
-	public static final SodraServer instance = new SodraServer();
 	private SolrClient client;
 	private Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr-5.3.1/solr/server/solr");
+	private CFMetaData metadata;
+	private Integer id = 0;
+	private String indexName;
 
-	public SodraServer() {
+	public SodraServer(CFMetaData metadata) {
+		this.metadata = metadata;
 		client = new HttpSolrClient("http://localhost:8983/solr");
 	}
 
 	public void createIndex(String indexName, Collection<ColumnDefinition> columns)
 			throws SolrServerException, IOException {
+		this.indexName = indexName;
+		Path solrCorePath = SodraUtils.getSolrCorePath(solrHome, indexName);
+		if (solrCorePath.toFile().exists()) {
+			return;
+		}
 		SodraUtils.createSolrCoreDirs(solrHome, indexName);
 		CoreAdminResponse createCoreRsp = Create.createCore(indexName, indexName, client);
 		if (createCoreRsp.getStatus() != 0) {
@@ -134,6 +154,8 @@ public class SodraServer {
 		StreamResult result = new StreamResult(schemaXML.toFile());
 		DOMSource source = new DOMSource(document);
 		transformer.transform(source, result);
+		
+		CoreAdminRequest.reloadCore(indexName, client);
 	}
 
 	public void deleteIndex(String indexName) throws SolrServerException, IOException {
@@ -143,7 +165,38 @@ public class SodraServer {
 		}
 		SodraUtils.deleteSolrCore(solrHome, indexName);
 	}
-	
+
+	public void index(DecoratedKey key, ColumnFamily cf) throws SolrServerException, IOException {
+		try {
+		SolrInputDocument doc = new SolrInputDocument();
+		if (cf.iterator().hasNext()) {
+			for (Cell cell : cf) {
+				ByteBuffer value = cell.value();
+				CellName cellName = cell.name();
+				ColumnDefinition columnDefinition = metadata.getColumnDefinition(cellName);
+				if (columnDefinition == null) {
+					continue;
+				}
+				String fieldName = columnDefinition.name.toString();
+				AbstractType<?> type = columnDefinition.type;
+				Object composedValue = null;
+				if (type.asCQL3Type() == CQL3Type.Native.INT) {
+					composedValue = ((Int32Type) type).compose(value);
+				} else if (type.asCQL3Type() == CQL3Type.Native.TEXT) {
+					composedValue = ((UTF8Type) type).compose(value);
+				}
+				doc.addField(fieldName, composedValue);
+			}
+			id++;
+			doc.addField("user_id", id);
+		}
+		client.add(indexName, doc);
+		client.commit(indexName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
 	}
 
