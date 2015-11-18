@@ -44,12 +44,15 @@ import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CoreAdminRequest;
 import org.apache.solr.client.solrj.request.CoreAdminRequest.Create;
 import org.apache.solr.client.solrj.request.CoreAdminRequest.Unload;
 import org.apache.solr.client.solrj.response.CoreAdminResponse;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
@@ -97,6 +100,10 @@ public class SodraServer {
 			deleteIndex(indexName);
 			throw new SolrServerException(e.getMessage(), e);
 		}
+	}
+	
+	public String getIndexName() {
+		return indexName;
 	}
 
 	protected void updateSchemaConfigFile(String indexName, Collection<ColumnDefinition> columns) throws Exception {
@@ -154,7 +161,7 @@ public class SodraServer {
 		StreamResult result = new StreamResult(schemaXML.toFile());
 		DOMSource source = new DOMSource(document);
 		transformer.transform(source, result);
-		
+
 		CoreAdminRequest.reloadCore(indexName, client);
 	}
 
@@ -168,36 +175,40 @@ public class SodraServer {
 
 	public void index(DecoratedKey key, ColumnFamily cf) throws SolrServerException, IOException {
 		try {
-		SolrInputDocument doc = new SolrInputDocument();
-		if (cf.iterator().hasNext()) {
-			for (Cell cell : cf) {
-				ByteBuffer value = cell.value();
-				CellName cellName = cell.name();
-				ColumnDefinition columnDefinition = metadata.getColumnDefinition(cellName);
-				if (columnDefinition == null) {
-					continue;
+			SolrInputDocument doc = new SolrInputDocument();
+			if (cf.iterator().hasNext()) {
+				for (Cell cell : cf) {
+					ByteBuffer value = cell.value();
+					CellName cellName = cell.name();
+					ColumnDefinition columnDefinition = metadata.getColumnDefinition(cellName);
+					if (columnDefinition == null) {
+						continue;
+					}
+					String fieldName = columnDefinition.name.toString();
+					AbstractType<?> type = columnDefinition.type;
+					Object composedValue = null;
+					if (type.asCQL3Type() == CQL3Type.Native.INT) {
+						composedValue = ((Int32Type) type).compose(value);
+					} else if (type.asCQL3Type() == CQL3Type.Native.TEXT) {
+						composedValue = ((UTF8Type) type).compose(value);
+					}
+					doc.addField(fieldName, composedValue);
 				}
-				String fieldName = columnDefinition.name.toString();
-				AbstractType<?> type = columnDefinition.type;
-				Object composedValue = null;
-				if (type.asCQL3Type() == CQL3Type.Native.INT) {
-					composedValue = ((Int32Type) type).compose(value);
-				} else if (type.asCQL3Type() == CQL3Type.Native.TEXT) {
-					composedValue = ((UTF8Type) type).compose(value);
-				}
-				doc.addField(fieldName, composedValue);
+				id++;
+				doc.addField("user_id", id);
 			}
-			id++;
-			doc.addField("user_id", id);
-		}
-		client.add(indexName, doc);
-		client.commit(indexName);
+			client.add(indexName, doc);
+			client.commit(indexName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void main(String[] args) {
+	public SolrDocumentList search(String query) throws SolrServerException, IOException {
+		SolrQuery solrQuery = new SolrQuery();
+		solrQuery.setQuery(query);
+		QueryResponse response = client.query(indexName, solrQuery);
+		return response.getResults();
 	}
 
 }

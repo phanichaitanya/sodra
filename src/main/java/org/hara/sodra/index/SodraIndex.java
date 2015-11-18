@@ -35,6 +35,7 @@ import org.apache.cassandra.dht.IPartitioner;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.utils.concurrent.OpOrder.Group;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.hara.sodra.search.SodraIndexSearcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	private IPartitioner partitioner;
 
 	private CFMetaData metadata;
-	
+
 	private SodraServer sodraServer;
 
 	@Override
@@ -99,7 +100,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 
 	@Override
 	protected SecondaryIndexSearcher createSecondaryIndexSearcher(Set<ByteBuffer> columns) {
-		return null;
+		return new SodraIndexSearcher(baseCfs.indexManager, columns, sodraServer);
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 
 	@Override
 	public ColumnFamilyStore getIndexCfs() {
-		return null;
+		return baseCfs;
 	}
 
 	@Override
