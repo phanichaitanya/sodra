@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.IndexExpression;
 import org.apache.cassandra.db.Row;
@@ -66,7 +67,11 @@ public class SodraIndexSearcher extends SecondaryIndexSearcher {
 				DecoratedKey decorateKey = baseCfs.partitioner.decorateKey(decomposedUserId);
 				QueryFilter queryFilter = QueryFilter.getIdentityFilter(decorateKey, sodraServer.getIndexName(),
 						filter.timestamp);
-				Row row = new Row(decomposedUserId, baseCfs.getColumnFamily(queryFilter));
+				ColumnFamily columnFamily = baseCfs.getColumnFamily(queryFilter);
+				if (columnFamily == null) {
+					continue;
+				}
+				Row row = new Row(decomposedUserId, columnFamily);
 				rows.add(row);
 			}
 		} catch (SolrServerException | IOException e) {
