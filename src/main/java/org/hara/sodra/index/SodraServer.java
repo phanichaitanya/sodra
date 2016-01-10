@@ -101,7 +101,7 @@ public class SodraServer {
 			throw new SolrServerException(e.getMessage(), e);
 		}
 	}
-	
+
 	public String getIndexName() {
 		return indexName;
 	}
@@ -194,6 +194,7 @@ public class SodraServer {
 					}
 					doc.addField(fieldName, composedValue);
 				}
+				// TODO: get the primary key value directly from the field
 				id++;
 				doc.addField("user_id", id);
 			}
@@ -202,6 +203,12 @@ public class SodraServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void delete(DecoratedKey key) throws SolrServerException, IOException {
+		String userId = Integer.toString(Int32Type.instance.compose(key.getKey()));
+		client.deleteById(indexName, userId);
+		client.commit(indexName);
 	}
 
 	public SolrDocumentList search(String query) throws SolrServerException, IOException {

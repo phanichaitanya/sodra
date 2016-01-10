@@ -68,6 +68,12 @@ public class SodraIndex extends PerRowSecondaryIndex {
 
 	@Override
 	public void delete(DecoratedKey key, Group opGroup) {
+		try {
+			// TODO: test the delete document
+			sodraServer.delete(key);
+		} catch (SolrServerException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
