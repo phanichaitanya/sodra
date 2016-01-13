@@ -71,14 +71,14 @@ import org.w3c.dom.NodeList;
 public class SodraServer {
 
 	private SolrClient client;
-	private Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr-5.3.1/solr/server/solr");
+	private Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr");
 	private CFMetaData metadata;
 	private Integer id = 0;
 	private String indexName;
 
 	public SodraServer(CFMetaData metadata) {
 		this.metadata = metadata;
-		client = new HttpSolrClient("http://localhost:8983/solr");
+		client = new HttpSolrClient("http://localhost:7983/solr");
 	}
 
 	public void createIndex(String indexName, Collection<ColumnDefinition> columns)
@@ -216,6 +216,10 @@ public class SodraServer {
 		solrQuery.setQuery(query);
 		QueryResponse response = client.query(indexName, solrQuery);
 		return response.getResults();
+	}
+	
+	public static void main(String[] args) {
+		new SodraServer(null);
 	}
 
 }
