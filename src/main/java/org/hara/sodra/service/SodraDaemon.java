@@ -41,6 +41,7 @@ public class SodraDaemon extends CassandraDaemon {
 
 	@Override
 	public void start() {
+		// must start solr jetty first and then cassandra
 		try {
 			startSodra();
 		} catch (Exception e) {
