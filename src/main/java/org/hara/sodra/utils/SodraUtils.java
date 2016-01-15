@@ -37,12 +37,23 @@ public class SodraUtils {
 		return corePath;
 	}
 
+	public static final Path getSolrHome() {
+		String cassandraHome = System.getenv("CASSANDRA_HOME");
+		if (cassandraHome == null) {
+			throw new RuntimeException("CASSANDRA_HOME environment variable is not defined");
+		}
+		// TODO: read the cassandra.yaml file and construct the solr home based
+		// on data dir
+		Path solrHome = Paths.get(cassandraHome, "data", "sodra", "solr");
+		return solrHome;
+	}
+
 	public static final void createSolrCoreDirs(Path solrHome, String indexName) throws IOException {
 		Path corePath = getSolrCorePath(solrHome, indexName);
 		Files.createDirectory(corePath);
 		Path coreConfPath = Paths.get(corePath.toString(), "conf");
 		// TODO: store template config as part of sodra project
-		Path baseConfPath = Paths.get(solrHome.toString(), "configsets", "sodra_template_configs", "conf");
+		Path baseConfPath = Paths.get(solrHome.getParent().toString(), "index_template_config", "conf");
 		copySolrConfigs(baseConfPath, coreConfPath);
 	}
 
@@ -56,7 +67,11 @@ public class SodraUtils {
 	}
 
 	public static void main(String[] args) {
-		Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr");
+		String cassandraHome = System.getenv("CASSANDRA_HOME");
+		if (cassandraHome == null) {
+			throw new RuntimeException("CASSANDRA_HOME environment variable is not defined");
+		}
+		Path solrHome = Paths.get(cassandraHome, "data", "sodra", "solr");
 		try {
 			createSolrCoreDirs(solrHome, "tmp");
 		} catch (IOException e) {

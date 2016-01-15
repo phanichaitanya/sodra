@@ -21,6 +21,7 @@ package org.hara.sodra.service;
 
 import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.hara.sodra.utils.SodraUtils;
 
 /**
  * @author Phani Chaitanya Vempaty
@@ -34,20 +35,9 @@ public class SodraDaemon extends CassandraDaemon {
 	public void startSodra() throws Exception {
 		int port = 7983;
 		String context = "/solr";
-		String solrHome = "/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr";
+		String solrHome = SodraUtils.getSolrHome().toString();
 		solrServer = new JettySolrRunner(solrHome, context, port);
 		solrServer.start();
-	}
-
-	@Override
-	public void start() {
-		// must start solr jetty first and then cassandra
-		try {
-			startSodra();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		super.start();
 	}
 
 	@Override
@@ -60,7 +50,18 @@ public class SodraDaemon extends CassandraDaemon {
 		super.stop();
 	}
 
+	public void activateSodra() {
+		// must start solr jetty first and then cassandra
+		try {
+			instance.startSodra();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
 	public static void main(String[] args) {
+		instance.activateSodra();
 		instance.activate();
 	}
 

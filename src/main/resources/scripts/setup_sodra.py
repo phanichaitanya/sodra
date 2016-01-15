@@ -5,21 +5,11 @@ import os
 from optparse import OptionParser
 import shutil
 import stat
+import yaml
 
-def parseargs(args):
-    parser = OptionParser()
-    parser.add_option("-c", "--cassandra_home", dest="cassandra_home", type='string',
-                      help="Path to cassandra home directory")
-    
-    (options, args) = parser.parse_args(args)
-    return (options, args)
-
-def setup_sodra(cassandra_home_dir):
-    contents = set(os.listdir('.'))
-    if 'lib' not in contents:
-        raise Exception('Usage : ./scripts/setup_sodra.py -c <cassandra_home>')
+def copy_sodra_files(cassandra_home_dir, sodra_dist_contents):
     sodra_jar = None
-    for file in contents:
+    for file in sodra_dist_contents:
         if file.startswith('sodra') and file.endswith('.jar'):
             sodra_jar = file
     if sodra_jar is None:
@@ -40,10 +30,44 @@ def setup_sodra(cassandra_home_dir):
     
     # make the sodra script executable
     os.chmod(os.path.join(cassandra_home_dir, 'bin', 'sodra'), stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+def create_solr_home(cassandra_home_dir, sodra_dist_contents):
+    cassandra_conf_file = os.path.join(cassandra_home_dir, 'conf', 'cassandra.yaml')
+    config = yaml.load(open(cassandra_conf_file))
+    cassandra_data_dir = os.path.join(cassandra_home_dir, 'data')
+    if 'data_file_directories' in config:
+        data_dirs = config['data_file_directories']
+        if data_dirs is not None and len(data_dirs) > 0:
+            cassandra_data_dir = data_dirs[0]
+    
+    sodra_dir = os.path.join(cassandra_data_dir, 'sodra')
+    if os.path.exists(sodra_dir):
+        raise Exception('Previous stale "sodra" directory exists inside : ' + cassandra_data_dir + ' . Delete that directory')
+    os.makedirs(sodra_dir)
+            
+    solr_home_dir = os.path.join(cassandra_data_dir, 'sodra', 'solr')
+    os.makedirs(solr_home_dir)
+    
+    shutil.copytree('config/index_template_config', os.path.join(sodra_dir, 'index_template_config'))
+    
+    shutil.copyfile('config/solr.xml', os.path.join(solr_home_dir, 'solr.xml'))
+    
+def setup_sodra(cassandra_home_dir=None):
+    
+    if cassandra_home_dir is None:
+        cassandra_home_dir = os.getenv('CASSANDRA_HOME')
+        
+    if cassandra_home_dir is None:
+        raise Exception('You should define "CASSANDRA_HOME" environment variable')
+    
+    sodra_dist_contents = set(os.listdir('.'))
+    if 'lib' not in sodra_dist_contents:
+        raise Exception('Usage : ./scripts/setup_sodra.py')
+
+    copy_sodra_files(cassandra_home_dir, sodra_dist_contents)
+    
+    create_solr_home(cassandra_home_dir, sodra_dist_contents)
     
 if __name__ == '__main__':
-    (options, args) = parseargs(sys.argv[1:])
-    if options.cassandra_home is None:
-        raise Exception('Usage : ./scripts/setup_sodra.py -c <cassandra_home>')
-    setup_sodra(options.cassandra_home)
+    setup_sodra()
     

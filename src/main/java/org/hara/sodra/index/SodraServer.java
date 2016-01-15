@@ -71,14 +71,15 @@ import org.w3c.dom.NodeList;
 public class SodraServer {
 
 	private SolrClient client;
-	private Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr");
+	private Path solrHome = null;
 	private CFMetaData metadata;
 	private String indexName;
 	private ColumnDefinition idColumn = null;
 
 	public SodraServer(CFMetaData metadata) {
 		this.metadata = metadata;
-		client = new HttpSolrClient("http://localhost:7983/solr");
+		this.client = new HttpSolrClient("http://localhost:7983/solr");
+		this.solrHome = SodraUtils.getSolrHome();
 	}
 
 	protected ColumnDefinition findIdColumn(Collection<ColumnDefinition> columns) {
