@@ -21,8 +21,15 @@ package org.hara.sodra.index;
 
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.BooleanType;
+import org.apache.cassandra.db.marshal.ByteType;
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.DateType;
+import org.apache.cassandra.db.marshal.DoubleType;
+import org.apache.cassandra.db.marshal.FloatType;
 import org.apache.cassandra.db.marshal.Int32Type;
 import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 
 /**
@@ -31,17 +38,27 @@ import org.apache.cassandra.db.marshal.UTF8Type;
  */
 public class CassandraToSodraTypeMapper {
 
-	public static String getSodraType(AbstractType<?> cassandraType) {
+	public static String getSolrType(AbstractType<?> cassandraType) {
 		if (cassandraType.getClass() == BooleanType.class) {
 			return "boolean";
 		} else if (cassandraType.getClass() == UTF8Type.class) {
 			return "text_en";
-		} else if (cassandraType.getClass() == Int32Type.class) {
+		} else if (cassandraType.getClass() == Int32Type.class || cassandraType.getClass() == IntegerType.class) {
 			return "int";
-		} else if (cassandraType.getClass() == IntegerType.class) {
-			return "int";
+		} else if (cassandraType.getClass() == LongType.class) {
+			return "long";
+		} else if (cassandraType.getClass() == ByteType.class || cassandraType.getClass() == BytesType.class) {
+			return "binary";
+		} else if (cassandraType.getClass() == FloatType.class) {
+			return "float";
+		} else if (cassandraType.getClass() == DateType.class || cassandraType.getClass() == TimestampType.class) {
+			return "tdate";
+		} else if (cassandraType.getClass() == DoubleType.class) {
+			return "double";
+		} else if (cassandraType.getClass() == FloatType.class) {
+			return "float";
 		}
 		return "text_general";
 	}
-	
+
 }

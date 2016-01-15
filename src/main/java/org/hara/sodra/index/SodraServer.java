@@ -138,7 +138,7 @@ public class SodraServer {
 			Attr multi = document.createAttribute("multiValued");
 
 			name.setValue(cd.name.toString());
-			type.setValue(CassandraToSodraTypeMapper.getSodraType(cd.type));
+			type.setValue(CassandraToSodraTypeMapper.getSolrType(cd.type));
 			indexed.setValue("true");
 			if (cd.isPrimaryKeyColumn()) {
 				stored.setValue("true");
@@ -210,6 +210,7 @@ public class SodraServer {
 				doc.addField(idColumn.name.toString(), id);
 			}
 			client.add(indexName, doc);
+			// TODO: remove the commit after issue #7
 			client.commit(indexName);
 		} catch (Exception e) {
 			e.printStackTrace();
