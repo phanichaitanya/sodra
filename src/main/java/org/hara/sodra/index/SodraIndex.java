@@ -82,6 +82,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 		indexName = baseCfs.name;
 		partitioner = baseCfs.partitioner;
 		metadata = Schema.instance.getCFMetaData(baseCfs.keyspace.getName(), baseCfs.name);
+		// TODO: create a map of sodra server associated with table name
 		sodraServer = new SodraServer(metadata);
 		try {
 			// do not create the index if it already exists ?

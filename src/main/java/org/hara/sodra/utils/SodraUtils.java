@@ -36,11 +36,12 @@ public class SodraUtils {
 		Path corePath = Paths.get(solrHome.toString(), indexName);
 		return corePath;
 	}
-	
+
 	public static final void createSolrCoreDirs(Path solrHome, String indexName) throws IOException {
 		Path corePath = getSolrCorePath(solrHome, indexName);
 		Files.createDirectory(corePath);
 		Path coreConfPath = Paths.get(corePath.toString(), "conf");
+		// TODO: store template config as part of sodra project
 		Path baseConfPath = Paths.get(solrHome.toString(), "configsets", "sodra_template_configs", "conf");
 		copySolrConfigs(baseConfPath, coreConfPath);
 	}
@@ -55,7 +56,7 @@ public class SodraUtils {
 	}
 
 	public static void main(String[] args) {
-		Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr-5.3.1/solr/server/solr");
+		Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr");
 		try {
 			createSolrCoreDirs(solrHome, "tmp");
 		} catch (IOException e) {

@@ -73,17 +73,30 @@ public class SodraServer {
 	private SolrClient client;
 	private Path solrHome = Paths.get("/Users/pvempaty/work/projects/solr/solr-5.3.1/solr/server/solr");
 	private CFMetaData metadata;
-	private Integer id = 0;
 	private String indexName;
+	private ColumnDefinition idColumn = null;
 
 	public SodraServer(CFMetaData metadata) {
 		this.metadata = metadata;
 		client = new HttpSolrClient("http://localhost:7983/solr");
 	}
 
+	protected ColumnDefinition findIdColumn(Collection<ColumnDefinition> columns) {
+		for (ColumnDefinition columnDefinition : columns) {
+			if (columnDefinition.isPrimaryKeyColumn()) {
+				return columnDefinition;
+			}
+		}
+		return null;
+	}
+
 	public void createIndex(String indexName, Collection<ColumnDefinition> columns)
 			throws SolrServerException, IOException {
 		this.indexName = indexName;
+		idColumn = findIdColumn(columns);
+		if (idColumn == null) {
+			throw new IOException("Table " + indexName + " does not have any primary key column");
+		}
 		Path solrCorePath = SodraUtils.getSolrCorePath(solrHome, indexName);
 		if (solrCorePath.toFile().exists()) {
 			return;
@@ -113,8 +126,6 @@ public class SodraServer {
 		DocumentBuilder documentBuilder = docBuilderFactory.newDocumentBuilder();
 		Document document = documentBuilder.parse(schemaXML.toFile());
 		Element rootNode = document.getDocumentElement();
-		// TODO: check if fields already exist before adding
-		ColumnDefinition idColumn = null;
 		for (ColumnDefinition cd : columns) {
 			Element field = document.createElement("field");
 			NamedNodeMap attributes = field.getAttributes();
@@ -129,7 +140,6 @@ public class SodraServer {
 			type.setValue(CassandraToSodraTypeMapper.getSodraType(cd.type));
 			indexed.setValue("true");
 			if (cd.isPrimaryKeyColumn()) {
-				idColumn = cd;
 				stored.setValue("true");
 			} else {
 				stored.setValue("false");
@@ -175,6 +185,7 @@ public class SodraServer {
 
 	public void index(DecoratedKey key, ColumnFamily cf) throws SolrServerException, IOException {
 		try {
+			String id = Integer.toString(Int32Type.instance.compose(key.getKey()));
 			SolrInputDocument doc = new SolrInputDocument();
 			if (cf.iterator().hasNext()) {
 				for (Cell cell : cf) {
@@ -195,8 +206,7 @@ public class SodraServer {
 					doc.addField(fieldName, composedValue);
 				}
 				// TODO: get the primary key value directly from the field
-				id++;
-				doc.addField("user_id", id);
+				doc.addField(idColumn.name.toString(), id);
 			}
 			client.add(indexName, doc);
 			client.commit(indexName);
@@ -206,8 +216,8 @@ public class SodraServer {
 	}
 
 	public void delete(DecoratedKey key) throws SolrServerException, IOException {
-		String userId = Integer.toString(Int32Type.instance.compose(key.getKey()));
-		client.deleteById(indexName, userId);
+		String id = Integer.toString(Int32Type.instance.compose(key.getKey()));
+		client.deleteById(indexName, id);
 		client.commit(indexName);
 	}
 
@@ -217,7 +227,7 @@ public class SodraServer {
 		QueryResponse response = client.query(indexName, solrQuery);
 		return response.getResults();
 	}
-	
+
 	public static void main(String[] args) {
 		new SodraServer(null);
 	}
