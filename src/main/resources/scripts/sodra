@@ -165,6 +165,10 @@ launch_service()
 args=`getopt vfhp:bD:H:E: "$@"`
 eval set -- "$args"
 
+for jar in "$CASSANDRA_HOME"/sodra_lib/*.jar; do
+	CLASSPATH="$CLASSPATH:$jar"
+done
+
 classname="org.hara.sodra.service.SodraDaemon"
 
 while true; do

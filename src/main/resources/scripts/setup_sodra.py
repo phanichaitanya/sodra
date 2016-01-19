@@ -15,15 +15,18 @@ def copy_sodra_files(cassandra_home_dir, sodra_dist_contents):
     if sodra_jar is None:
         raise Exception('Could not find sodra jar file in the current directory')
     lib_contents = set(os.listdir('lib'))
-    cassandra_lib_dir = os.path.join(cassandra_home_dir, 'lib')
+    sodra_lib_dir = os.path.join(cassandra_home_dir, 'sodra_lib')
+    if os.path.exists(sodra_lib_dir):
+        raise Exception('Remove "sodra_lib" directory from cassandra home')
+    os.makedirs(sodra_lib_dir)
     
     # copy all the sodra dependency lib
     for sodra_lib_file in lib_contents:
         sodra_lib_file = os.path.join('lib', sodra_lib_file)
-        shutil.copy(sodra_lib_file, cassandra_lib_dir)
+        shutil.copy(sodra_lib_file, sodra_lib_dir)
     
     # copy the sodra jar file
-    shutil.copy(sodra_jar, cassandra_lib_dir)
+    shutil.copy(sodra_jar, sodra_lib_dir)
     
     # copy the sodra shell script to cassandra "bin" dir
     shutil.copyfile(os.path.join('scripts', 'sodra'), os.path.join(cassandra_home_dir, 'bin', 'sodra'))
