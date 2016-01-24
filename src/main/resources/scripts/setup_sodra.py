@@ -2,7 +2,7 @@
 
 import sys
 import os
-from optparse import OptionParser
+import argparse
 import shutil
 import stat
 import yaml
@@ -54,7 +54,20 @@ def create_solr_home(cassandra_home_dir, sodra_dist_contents):
     shutil.copytree('config/index_template_config', os.path.join(sodra_dir, 'index_template_config'))
     
     shutil.copyfile('config/solr.xml', os.path.join(solr_home_dir, 'solr.xml'))
+
+def setup_sodra_files(cassandra_home_dir):
     
+    if cassandra_home_dir is None:
+        raise Exception('cassandra home cannot be None')
+
+    sodra_dist_contents = set(os.listdir('.'))
+    if 'lib' not in sodra_dist_contents:
+        raise Exception('Usage : ./scripts/setup_sodra.py')
+
+    copy_sodra_files(cassandra_home_dir, sodra_dist_contents)
+    
+    create_solr_home(cassandra_home_dir, sodra_dist_contents)
+
 def setup_sodra(cassandra_home_dir=None):
     
     if cassandra_home_dir is None:
@@ -63,14 +76,81 @@ def setup_sodra(cassandra_home_dir=None):
     if cassandra_home_dir is None:
         raise Exception('You should define "CASSANDRA_HOME" environment variable')
     
-    sodra_dist_contents = set(os.listdir('.'))
-    if 'lib' not in sodra_dist_contents:
-        raise Exception('Usage : ./scripts/setup_sodra.py')
-
-    copy_sodra_files(cassandra_home_dir, sodra_dist_contents)
+    setup_sodra_files(cassandra_home_dir)
     
-    create_solr_home(cassandra_home_dir, sodra_dist_contents)
+def delete_sodra_files(cassandra_home_dir):
+    
+    if cassandra_home_dir is None:
+        raise Exception('cassandra home cannot be None')
+    
+    cassandra_conf_file = os.path.join(cassandra_home_dir, 'conf', 'cassandra.yaml')
+    config = yaml.load(open(cassandra_conf_file))
+    cassandra_data_dir = os.path.join(cassandra_home_dir, 'data')
+    if 'data_file_directories' in config:
+        data_dirs = config['data_file_directories']
+        if data_dirs is not None and len(data_dirs) > 0:
+            cassandra_data_dir = data_dirs[0]
+    sodra_dir = os.path.join(cassandra_data_dir, 'sodra')
+    shutil.rmtree(sodra_dir)
+    
+    sodra_script = os.path.join(cassandra_home_dir, 'bin', 'sodra')
+    os.remove(sodra_script)
+
+    sodra_lib_dir = os.path.join(cassandra_home_dir, 'sodra_lib')
+    shutil.rmtree(sodra_lib_dir)
+    
+def delete_sodra(cassandra_home_dir=None):
+    
+    if cassandra_home_dir is None:
+        cassandra_home_dir = os.getenv('CASSANDRA_HOME')
+        
+    if cassandra_home_dir is None:
+        raise Exception('You should define "CASSANDRA_HOME" environment variable')
+    
+    delete_sodra_files(cassandra_home_dir)
+
+def parseargs(args):
+    parser = argparse.ArgumentParser(description='Sodra setup arguments')
+    parser.add_argument('-c', '--cassandra_home', dest='cassandra_home', type=str,
+                      help='Path to cassandra home directory')
+    parser.add_argument('-d', '--delete', dest='delete', action='store_true',
+                      help='Delete sodra installation')
+    parser.add_argument('-p', '--pseudo', dest='pseudo', action='store_true',
+                      help='Pseduo distribution mode (single host)')
+    parser.add_argument('-a', '--all_homes', dest='all_homes', type=file,
+                      help='All cassandra home locations for pseudo mode in a file - one location per line')
+    
+    return parser.parse_args(args)
+    
+def pseudo_setup(options):
+    if options.all_homes is None:
+        raise Exception('all_homes location argument is missing')
+    for cassandra_home_dir in options.all_homes:
+        cassandra_home_dir = cassandra_home_dir.strip()
+        setup_sodra_files(cassandra_home_dir)
+
+def pseudo_delete(options):
+    if options.all_homes is None:
+        raise Exception('all_homes location argument is missing')
+    for cassandra_home_dir in options.all_homes:
+        cassandra_home_dir = cassandra_home_dir.strip()
+        delete_sodra_files(cassandra_home_dir)
     
 if __name__ == '__main__':
-    setup_sodra()
+    options = parseargs(sys.argv[1:])
+    if options.pseudo:
+        if options.delete:
+            pseudo_delete(options)
+        else:
+            pseudo_setup(options)
+    elif options.delete:
+        if options.cassandra_home is not None:
+            delete_sodra(options.cassandra_home)
+        else:
+            delete_sodra()
+    else:
+        if options.cassandra_home is not None:
+            setup_sodra(options.cassandra_home)
+        else:
+            setup_sodra()
     
