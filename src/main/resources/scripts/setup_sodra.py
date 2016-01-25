@@ -15,6 +15,13 @@ def copy_sodra_files(cassandra_home_dir, sodra_dist_contents):
     if sodra_jar is None:
         raise Exception('Could not find sodra jar file in the current directory')
     lib_contents = set(os.listdir('lib'))
+
+    sodra_conf_dir = os.path.join(cassandra_home_dir, 'sodra_conf')
+    if os.path.exists(sodra_conf_dir):
+        raise Exception('Remove "sodra_conf" directory from cassandra home')
+    # copy all the sodra conf
+    shutil.copytree('config/sodra_conf', sodra_conf_dir)
+    
     sodra_lib_dir = os.path.join(cassandra_home_dir, 'sodra_lib')
     if os.path.exists(sodra_lib_dir):
         raise Exception('Remove "sodra_lib" directory from cassandra home')
@@ -95,6 +102,9 @@ def delete_sodra_files(cassandra_home_dir):
     
     sodra_script = os.path.join(cassandra_home_dir, 'bin', 'sodra')
     os.remove(sodra_script)
+    
+    sodra_conf_dir = os.path.join(cassandra_home_dir, 'sodra_conf')
+    shutil.rmtree(sodra_conf_dir)
 
     sodra_lib_dir = os.path.join(cassandra_home_dir, 'sodra_lib')
     shutil.rmtree(sodra_lib_dir)

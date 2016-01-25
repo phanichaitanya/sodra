@@ -31,7 +31,7 @@ import org.apache.commons.io.FileUtils;
  *
  */
 public class SodraUtils {
-
+	
 	public static final Path getSolrCorePath(Path solrHome, String indexName) {
 		Path corePath = Paths.get(solrHome.toString(), indexName);
 		return corePath;
@@ -52,7 +52,6 @@ public class SodraUtils {
 		Path corePath = getSolrCorePath(solrHome, indexName);
 		Files.createDirectory(corePath);
 		Path coreConfPath = Paths.get(corePath.toString(), "conf");
-		// TODO: store template config as part of sodra project
 		Path baseConfPath = Paths.get(solrHome.getParent().toString(), "index_template_config", "conf");
 		copySolrConfigs(baseConfPath, coreConfPath);
 	}

@@ -56,6 +56,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
+import org.hara.sodra.service.SodraDaemon;
 import org.hara.sodra.utils.SodraUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -78,7 +79,7 @@ public class SodraServer {
 
 	public SodraServer(CFMetaData metadata) {
 		this.metadata = metadata;
-		this.client = new HttpSolrClient("http://localhost:7983/solr");
+		this.client = new HttpSolrClient("http://localhost:" + SodraDaemon.solrPort + "/solr");
 		this.solrHome = SodraUtils.getSolrHome();
 	}
 

@@ -19,9 +19,17 @@
 
 package org.hara.sodra.service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
+import org.hara.sodra.SodraConfig;
 import org.hara.sodra.utils.SodraUtils;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
  * @author Phani Chaitanya Vempaty
@@ -29,14 +37,41 @@ import org.hara.sodra.utils.SodraUtils;
  */
 public class SodraDaemon extends CassandraDaemon {
 
+	private static SodraConfig sodraConfig;
+	
+	public static Integer solrPort = 8983;
+
+	static {
+		try {
+			loadConfig();
+		} catch (Exception e) {
+			throw new ExceptionInInitializerError(e);
+		}
+	}
+
+	private static void loadConfig() throws Exception {
+		String cassandraHome = System.getenv("CASSANDRA_HOME");
+		if (cassandraHome == null) {
+			throw new Exception("CASSANDRA_HOME environment variable is not defined");
+		}
+		Path sodraConfigPath = Paths.get(cassandraHome, "sodra_conf", "sodra.yaml");
+		File sodraConfigFile = sodraConfigPath.toFile();
+		if (!sodraConfigFile.exists()) {
+			throw new Exception("sodra.yaml does not exist inside sodra_conf dir under cassandra home");
+		}
+		FileInputStream fis = new FileInputStream(sodraConfigFile);
+		Yaml yaml = new Yaml(new Constructor(SodraConfig.class));
+		sodraConfig = yaml.loadAs(fis, SodraConfig.class);
+		solrPort = sodraConfig.solr_port;
+	}
+
 	private static final SodraDaemon instance = new SodraDaemon();
 	private JettySolrRunner solrServer;
 
 	public void startSodra() throws Exception {
-		int port = 7983;
 		String context = "/solr";
 		String solrHome = SodraUtils.getSolrHome().toString();
-		solrServer = new JettySolrRunner(solrHome, context, port);
+		solrServer = new JettySolrRunner(solrHome, context, solrPort);
 		solrServer.start();
 	}
 
@@ -50,8 +85,10 @@ public class SodraDaemon extends CassandraDaemon {
 		super.stop();
 	}
 
+	/**
+	 * must start solr jetty first before activating cassandra daemon
+	 */
 	public void activateSodra() {
-		// must start solr jetty first and then cassandra
 		try {
 			instance.startSodra();
 		} catch (Exception e) {
