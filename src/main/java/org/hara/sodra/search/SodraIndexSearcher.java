@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.IndexExpression;
@@ -61,17 +62,22 @@ public class SodraIndexSearcher extends SecondaryIndexSearcher {
 		String query = UTF8Type.instance.compose(indexExpression.value);
 		try {
 			SolrDocumentList results = sodraServer.search(query);
+			ColumnDefinition idColumn = sodraServer.getIdColumn();
+			if (idColumn == null) {
+				throw new IOException("No id column for index : " + sodraServer.getIndexName());
+			}
+			String idField = idColumn.name.toString();
 			for (SolrDocument doc : results) {
-				Integer userId = (Integer) doc.getFieldValue("user_id");
-				ByteBuffer decomposedUserId = Int32Type.instance.decompose(userId);
-				DecoratedKey decorateKey = baseCfs.partitioner.decorateKey(decomposedUserId);
+				Integer id = (Integer) doc.getFieldValue(idField);
+				ByteBuffer decomposedId = Int32Type.instance.decompose(id);
+				DecoratedKey decorateKey = baseCfs.partitioner.decorateKey(decomposedId);
 				QueryFilter queryFilter = QueryFilter.getIdentityFilter(decorateKey, sodraServer.getIndexName(),
 						filter.timestamp);
 				ColumnFamily columnFamily = baseCfs.getColumnFamily(queryFilter);
 				if (columnFamily == null) {
 					continue;
 				}
-				Row row = new Row(decomposedUserId, columnFamily);
+				Row row = new Row(decomposedId, columnFamily);
 				rows.add(row);
 			}
 		} catch (SolrServerException | IOException e) {

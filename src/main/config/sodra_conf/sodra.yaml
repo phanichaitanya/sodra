@@ -1,5 +1,8 @@
 # Sodra config YAML
 
+# solr host
+solr_host: 127.0.0.1
+
 # solr jetty port
 solr_port: 7983
 

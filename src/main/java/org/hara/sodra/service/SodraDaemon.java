@@ -48,6 +48,10 @@ public class SodraDaemon extends CassandraDaemon {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
+	
+	public static SodraConfig getSodraConfig() {
+		return sodraConfig;
+	}
 
 	private static void loadConfig() throws Exception {
 		String cassandraHome = System.getenv("CASSANDRA_HOME");
@@ -62,7 +66,6 @@ public class SodraDaemon extends CassandraDaemon {
 		FileInputStream fis = new FileInputStream(sodraConfigFile);
 		Yaml yaml = new Yaml(new Constructor(SodraConfig.class));
 		sodraConfig = yaml.loadAs(fis, SodraConfig.class);
-		solrPort = sodraConfig.solr_port;
 	}
 
 	private static final SodraDaemon instance = new SodraDaemon();
@@ -71,7 +74,7 @@ public class SodraDaemon extends CassandraDaemon {
 	public void startSodra() throws Exception {
 		String context = "/solr";
 		String solrHome = SodraUtils.getSolrHome().toString();
-		solrServer = new JettySolrRunner(solrHome, context, solrPort);
+		solrServer = new JettySolrRunner(solrHome, context, SodraDaemon.getSodraConfig().solr_port);
 		solrServer.start();
 	}
 

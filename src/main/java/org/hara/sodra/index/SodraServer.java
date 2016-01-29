@@ -79,7 +79,8 @@ public class SodraServer {
 
 	public SodraServer(CFMetaData metadata) {
 		this.metadata = metadata;
-		this.client = new HttpSolrClient("http://localhost:" + SodraDaemon.solrPort + "/solr");
+		this.client = new HttpSolrClient("http://" + SodraDaemon.getSodraConfig().solr_host + ":"
+				+ SodraDaemon.getSodraConfig().solr_port + "/solr");
 		this.solrHome = SodraUtils.getSolrHome();
 	}
 
@@ -119,6 +120,10 @@ public class SodraServer {
 
 	public String getIndexName() {
 		return indexName;
+	}
+
+	public ColumnDefinition getIdColumn() {
+		return idColumn;
 	}
 
 	protected void updateSchemaConfigFile(String indexName, Collection<ColumnDefinition> columns) throws Exception {

@@ -27,4 +27,6 @@ public class SodraConfig {
 	
 	public Integer solr_port = 8983;
 	
+	public String solr_host = "127.0.0.1";
+	
 }
