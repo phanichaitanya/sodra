@@ -1,2 +1,2 @@
 include 'sodra-backend'
-include 'sodra-deploy'
+include 'sodra-ui'
