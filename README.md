@@ -17,8 +17,6 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 
 ## Build
 
-* Building the sodra jar
-
 > ./gradlew sodra-backend:shadowJar
 
 ## Distribution
@@ -27,7 +25,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 
 ## Testing
 
-> unzip sodra-backend-0.1.zip
-> cd sodra
-> ./setup
-> docker run -it sodra:latest
+> * unzip sodra-backend-0.1.zip
+> * cd sodra
+> * ./setup
+> * docker run -it sodra:latest
