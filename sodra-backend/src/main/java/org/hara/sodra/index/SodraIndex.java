@@ -58,9 +58,9 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	@Override
 	public void index(ByteBuffer rowKey, ColumnFamily cf) {
 		System.out.println("Getting index call");
-		DecoratedKey decorateKey = partitioner.decorateKey(rowKey);
+		DecoratedKey decorateKey = this.partitioner.decorateKey(rowKey);
 		try {
-			sodraServer.index(decorateKey, cf);
+			this.sodraServer.index(decorateKey, cf);
 		} catch (SolrServerException | IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -70,7 +70,7 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	public void delete(DecoratedKey key, Group opGroup) {
 		try {
 			// TODO: test the delete document
-			sodraServer.delete(key);
+			this.sodraServer.delete(key);
 		} catch (SolrServerException | IOException e) {
 			e.printStackTrace();
 		}
@@ -79,13 +79,13 @@ public class SodraIndex extends PerRowSecondaryIndex {
 	@Override
 	public void init() {
 		LOGGER.info("Initializing Sodra Index");
-		indexName = baseCfs.name;
-		partitioner = baseCfs.partitioner;
-		metadata = Schema.instance.getCFMetaData(baseCfs.keyspace.getName(), baseCfs.name);
-		sodraServer = new SodraServer(metadata);
+		this.indexName = this.baseCfs.name;
+		this.partitioner = this.baseCfs.partitioner;
+		this.metadata = Schema.instance.getCFMetaData(this.baseCfs.keyspace.getName(), this.baseCfs.name);
+		this.sodraServer = new SodraServer(this.metadata);
 		try {
 			// do not create the index if it already exists ?
-			sodraServer.createIndex(indexName, baseCfs.metadata.allColumns());
+			this.sodraServer.createIndex(this.indexName, this.baseCfs.metadata.allColumns());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -101,12 +101,12 @@ public class SodraIndex extends PerRowSecondaryIndex {
 
 	@Override
 	public String getIndexName() {
-		return indexName;
+		return this.indexName;
 	}
 
 	@Override
 	protected SecondaryIndexSearcher createSecondaryIndexSearcher(Set<ByteBuffer> columns) {
-		return new SodraIndexSearcher(baseCfs.indexManager, columns, sodraServer);
+		return new SodraIndexSearcher(this.baseCfs.indexManager, columns, this.sodraServer);
 	}
 
 	@Override
@@ -116,13 +116,13 @@ public class SodraIndex extends PerRowSecondaryIndex {
 
 	@Override
 	public ColumnFamilyStore getIndexCfs() {
-		return baseCfs;
+		return this.baseCfs;
 	}
 
 	@Override
 	public void removeIndex(ByteBuffer columnName) {
 		try {
-			sodraServer.deleteIndex(indexName);
+			this.sodraServer.deleteIndex(this.indexName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
