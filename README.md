@@ -4,6 +4,7 @@
 3. [Build](#build)
 4. [Distribution](#distribution)
 5. [Testing](#testing)
+6. [Examples](#examples)
 
 ## Overview
 
@@ -29,3 +30,24 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 > * cd sodra
 > * ./setup
 > * docker run -it sodra:latest
+
+## Examples
+
+* Create a keyspace
+
+> CREATE KEYSPACE IF NOT EXISTS sodra <br/>
+        WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+        
+* Create a table
+
+> CREATE TABLE user ( <br/>
+        id int PRIMARY KEY, <br/>
+        username text, <br/>
+        fullname text, <br/>
+        data text <br/>
+    );
+    
+* Insert some data
+
+> INSERT INTO user (id, username, fullname, data) <br/>
+        VALUES (1, 'redragons', 'Red Dragons', 'Some random data to insert here');

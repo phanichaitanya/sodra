@@ -1,16 +1,20 @@
-FROM cassandra:3
+FROM cassandra:2.2
 
 # install necessary components
 RUN apt-get -qq update \
-        && apt-get install -y python-yaml
+        && apt-get install -y python-yaml \
+        && apt-get install -y vim
 
 # add sodra artifacts to the docker image
-ADD sodra-backend-0.1-all.jar /sodra-backend-0.1-all.jar
-ADD setup /setup
-ADD docker_setup_sodra.py /docker_setup_sodra.py
+RUN mkdir -p /sodra_install
+ADD sodra-backend-0.1-all.jar /sodra_install/sodra-backend-0.1-all.jar
+ADD docker_setup_sodra.py /sodra_install/docker_setup_sodra.py
+ADD sodra_conf /sodra_install/sodra_conf
+ADD index_template_config /sodra_install/index_template_config
+ADD solr.xml /sodra_install/solr.xml
+ADD sodra_docker /sodra_install/sodra_docker
 
-RUN chmod u+x /setup
-RUN chmod u+x /setup_sodra.py
+RUN chmod u+x /sodra_install/docker_setup_sodra.py
 
 # install python yaml module
 #RUN apt-get install -y  \
