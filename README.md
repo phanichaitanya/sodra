@@ -56,3 +56,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 
 > CREATE CUSTOM INDEX user_idx ON sodra.user(data) <br/>
         USING 'org.hara.sodra.index.SodraIndex';
+        
+* Sample queries
+
+> SELECT * FROM user where data = 'data:some OR username:redragons';
