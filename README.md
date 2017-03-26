@@ -13,7 +13,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 ## Prerequisites
 
 * Docker (required only for testing or some non-ideal deployment setup)
-* Java >= 1.8
+* Java >= 1.7
 * Bash >= 4
 
 ## Build
@@ -51,3 +51,8 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 
 > INSERT INTO user (id, username, fullname, data) <br/>
         VALUES (1, 'redragons', 'Red Dragons', 'Some random data to insert here');
+        
+* Create sodra index (solr)
+
+> CREATE CUSTOM INDEX user_idx ON sodra.user(data) <br/>
+        USING 'org.hara.sodra.index.SodraIndex';

@@ -15,20 +15,10 @@ ADD solr.xml /sodra_install/solr.xml
 ADD sodra_docker /sodra_install/sodra_docker
 
 RUN chmod u+x /sodra_install/docker_setup_sodra.py
+RUN chmod u+x /sodra_install/sodra_docker
 
-# install python yaml module
-#RUN apt-get install -y  \
-#        apt-transport-https \
-#        ca-certificates \
-#        curl \
-#        software-properties-common 
+ENV SODRA_CONFIG_DIR="/etc/cassandra/sodra_conf" \
+        SODRA_DATA_DIR="/var/lib/cassandra/data/sodra"
 
-#RUN add-apt-repository main \
-#        && add-apt-repository universe \
-#        && add-apt-repository restricted \
-#        && add-apt-repository multiverse \
-#        && apt install python-yaml
-
-# Run all the commands
-# start cassandra
+# start sodra
 CMD bash

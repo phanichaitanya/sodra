@@ -15,6 +15,11 @@ dependencies {
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.11'
 }
 
+shadowJar() {
+    // if we don't merge the service files, various lucene codec formats conflict with each other
+    mergeServiceFiles()
+}
+
 task zip(dependsOn: shadowJar, type: Zip) {
     from 'build/libs'
     from 'scripts'

@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.solr.client.solrj.embedded.JettySolrRunner;
 import org.hara.sodra.SodraConfig;
+import org.hara.sodra.utils.SodraConstants;
 import org.hara.sodra.utils.SodraUtils;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -38,7 +39,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 public class SodraDaemon extends CassandraDaemon {
 
 	private static SodraConfig sodraConfig;
-	
+
 	public static Integer solrPort = 8983;
 
 	static {
@@ -48,17 +49,17 @@ public class SodraDaemon extends CassandraDaemon {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
-	
+
 	public static SodraConfig getSodraConfig() {
 		return sodraConfig;
 	}
 
 	private static void loadConfig() throws Exception {
-		String cassandraHome = System.getenv("CASSANDRA_HOME");
-		if (cassandraHome == null) {
-			throw new Exception("CASSANDRA_HOME environment variable is not defined");
+		String sodraConfigDir = System.getenv(SodraConstants.SODRA_CONFIG_DIR);
+		if (sodraConfigDir == null) {
+			throw new Exception("SODRA_CONFIG_DIR environment variable is not defined");
 		}
-		Path sodraConfigPath = Paths.get(cassandraHome, "sodra_conf", "sodra.yaml");
+		Path sodraConfigPath = Paths.get(sodraConfigDir, "sodra.yaml");
 		File sodraConfigFile = sodraConfigPath.toFile();
 		if (!sodraConfigFile.exists()) {
 			throw new Exception("sodra.yaml does not exist inside sodra_conf dir under cassandra home");
@@ -74,14 +75,14 @@ public class SodraDaemon extends CassandraDaemon {
 	public void startSodra() throws Exception {
 		String context = "/solr";
 		String solrHome = SodraUtils.getSolrHome().toString();
-		solrServer = new JettySolrRunner(solrHome, context, SodraDaemon.getSodraConfig().solr_port);
-		solrServer.start();
+		this.solrServer = new JettySolrRunner(solrHome, context, SodraDaemon.getSodraConfig().solr_port);
+		this.solrServer.start();
 	}
 
 	@Override
 	public void stop() {
 		try {
-			solrServer.stop();
+			this.solrServer.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

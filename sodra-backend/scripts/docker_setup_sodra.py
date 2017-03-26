@@ -70,6 +70,8 @@ def setup_sodra(options):
     # setup sodra script
     logging.info('Copying sodra script from ' + os.path.join(sodra_install_dir, 'sodra_docker') + ' to /usr/sbin/sodra_docker')
     shutil.copyfile(os.path.join(sodra_install_dir, 'sodra_docker'), '/usr/sbin/sodra_docker')
+    st = os.stat('/usr/sbin/sodra_docker')
+    os.chmod('/usr/sbin/sodra_docker', st.st_mode | stat.S_IEXEC)
     
     # setup sodra lib 
     setup_sodra_lib(cassandra_lib_dir, sodra_install_dir)
