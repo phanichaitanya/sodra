@@ -26,5 +26,8 @@ ENV SODRA_CONFIG_DIR="/etc/cassandra/sodra_conf" \
 
 ENTRYPOINT ["/sodra_entrypoint.sh"]
 
+# solr port
+EXPOSE 7983
+
 # start sodra in background mode
 CMD ["bash"]

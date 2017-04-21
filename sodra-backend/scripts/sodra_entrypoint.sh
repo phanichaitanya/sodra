@@ -70,6 +70,6 @@ pushd /sodra_install
 ./docker_setup_sodra.py
 popd
 
-# nohup sodra_docker &
+nohup sodra_docker &
 
 exec "$@"
