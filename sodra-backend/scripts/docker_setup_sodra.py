@@ -12,7 +12,7 @@ import logging
 # # cassandra conf : /etc/cassandra/
 # # cassandra lib : /usr/share/cassandra/
 # # cassandra data dir : /var/lib/cassandra/data
-## sodra install dir : /sodra_install
+# # sodra install dir : /sodra_install
 
 def setup_sodra_lib(cassandra_lib_dir, sodra_install_dir):
     sodra_lib_dir = os.path.join(cassandra_lib_dir, 'sodra_lib')
@@ -129,6 +129,7 @@ def parseargs(args):
     
 if __name__ == '__main__':
     options = parseargs(sys.argv[1:])
+    logging.basicConfig(filename='/docker.setup.log', level=logging.INFO)
     log_options(options)
     if options.remove:
         delete_sodra(options)

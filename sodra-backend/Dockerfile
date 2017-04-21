@@ -1,5 +1,7 @@
 FROM cassandra:2.2
 
+LABEL maintainer "Phani Chaitanya Vempaty"
+
 # install necessary components
 RUN apt-get -qq update \
         && apt-get install -y python-yaml \
@@ -13,12 +15,16 @@ ADD sodra_conf /sodra_install/sodra_conf
 ADD index_template_config /sodra_install/index_template_config
 ADD solr.xml /sodra_install/solr.xml
 ADD sodra_docker /sodra_install/sodra_docker
+ADD examples /sodra_install/examples
+ADD sodra_entrypoint.sh /sodra_entrypoint.sh
 
-RUN chmod u+x /sodra_install/docker_setup_sodra.py
-RUN chmod u+x /sodra_install/sodra_docker
+RUN chmod +x /sodra_install/docker_setup_sodra.py
+RUN chmod +x /sodra_install/sodra_docker
 
 ENV SODRA_CONFIG_DIR="/etc/cassandra/sodra_conf" \
         SODRA_DATA_DIR="/var/lib/cassandra/data/sodra"
 
-# start sodra
-CMD bash
+ENTRYPOINT ["/sodra_entrypoint.sh"]
+
+# start sodra in background mode
+CMD ["bash"]

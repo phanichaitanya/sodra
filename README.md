@@ -40,7 +40,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
         
 * Create a table
 
-> CREATE TABLE user ( <br/>
+> CREATE TABLE sodra.user ( <br/>
         id int PRIMARY KEY, <br/>
         username text, <br/>
         fullname text, <br/>
@@ -49,7 +49,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
     
 * Insert some data
 
-> INSERT INTO user (id, username, fullname, data) <br/>
+> INSERT INTO sodra.user (id, username, fullname, data) <br/>
         VALUES (1, 'redragons', 'Red Dragons', 'Some random data to insert here');
         
 * Create sodra index (solr)
@@ -59,4 +59,4 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
         
 * Sample queries
 
-> SELECT * FROM user where data = 'data:some OR username:redragons';
+> SELECT * FROM sodra.user where data = 'data:some OR username:redragons';
