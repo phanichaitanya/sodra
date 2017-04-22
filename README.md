@@ -23,7 +23,8 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 ## Distribution
 
 > ./gradlew sodra-backend:zip
-> Zip file will be located under "//sodra/sodra-backend/build/distributions"
+
+Zip file will be located under "//sodra/sodra-backend/build/distributions"
 
 ## Testing
 
@@ -37,4 +38,5 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 Once you are in the docker container:
 
 > cd /sodra_install/examples
+
 > cqlsh -f users
