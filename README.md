@@ -23,40 +23,18 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 ## Distribution
 
 > ./gradlew sodra-backend:zip
+> Zip file will be located under "//sodra/sodra-backend/build/distributions"
 
 ## Testing
 
 > * unzip sodra-backend-0.1.zip
 > * cd sodra
 > * ./setup
-> * docker run -it sodra:latest
+> * docker exec -it sodra bash
 
 ## Examples
 
-* Create a keyspace
+Once you are in the docker container:
 
-> CREATE KEYSPACE IF NOT EXISTS sodra <br/>
-        WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-        
-* Create a table
-
-> CREATE TABLE sodra.user ( <br/>
-        id int PRIMARY KEY, <br/>
-        username text, <br/>
-        fullname text, <br/>
-        data text <br/>
-    );
-    
-* Insert some data
-
-> INSERT INTO sodra.user (id, username, fullname, data) <br/>
-        VALUES (1, 'redragons', 'Red Dragons', 'Some random data to insert here');
-        
-* Create sodra index (solr)
-
-> CREATE CUSTOM INDEX user_idx ON sodra.user(data) <br/>
-        USING 'org.hara.sodra.index.SodraIndex';
-        
-* Sample queries
-
-> SELECT * FROM sodra.user where data = 'data:some OR username:redragons';
+> cd /sodra_install/examples
+> cqlsh -f users
