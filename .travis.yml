@@ -3,4 +3,5 @@ jdk: oraclejdk7
 script: 
   - ./gradlew sodra-backend:build
   - ./gradlew sodra-backend:jacocoTestReport
-  - bash <(curl -s https://codecov.io/bash) -f 'TEST*.xml'
+after_success:
+  - bash <(curl -s https://codecov.io/bash) -f 'TEST-*.xml'
