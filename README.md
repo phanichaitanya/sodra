@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/redragons/sodra.svg?branch=master)](https://travis-ci.org/redragons/sodra)
-![codecov](https://codecov.io/gh/redragons/sodra/branch/master/graph/badge.svg)](https://codecov.io/gh/redragons/sodra)
+[![codecov](https://codecov.io/gh/redragons/sodra/branch/master/graph/badge.svg)](https://codecov.io/gh/redragons/sodra)
 
 # Table of Contents
 1. [Overview](#overview)
