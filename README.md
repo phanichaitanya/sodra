@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/redragons/sodra.svg?branch=master)](https://travis-ci.org/redragons/sodra)
+
 # Table of Contents
 1. [Overview](#overview)
 2. [Prerequisites](#prerequisites)
