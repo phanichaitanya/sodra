@@ -1,3 +1,6 @@
 language: java
 jdk: oraclejdk7
-script: ./gradlew sodra-backend:build
+script: 
+  - ./gradlew sodra-backend:build
+  - ./gradlew jacocoTestReport
+  - bash <(curl -s https://codecov.io/bash)
