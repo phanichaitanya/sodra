@@ -1,4 +1,4 @@
 
 docker build -t sodra .
 
- docker run -d --name sodra -it sodra:latest
+docker run -d --name sodra -it sodra:latest
