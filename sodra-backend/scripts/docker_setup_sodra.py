@@ -17,7 +17,8 @@ import logging
 def setup_sodra_lib(cassandra_lib_dir, sodra_install_dir):
     sodra_lib_dir = os.path.join(cassandra_lib_dir, 'sodra_lib')
     if os.path.exists(sodra_lib_dir):
-        raise Exception('Remove "sodra_lib" directory from cassandra lib directory')
+        logging.info('sodra lib directory already exists. skipping ...')
+        return
     logging.info('Creating sodra lib dir : ' + sodra_lib_dir)
     os.makedirs(sodra_lib_dir)
     
@@ -36,14 +37,16 @@ def setup_sodra_conf(cassandra_conf_dir, sodra_install_dir):
     sodra_conf_install_dir = os.path.join(sodra_install_dir, 'sodra_conf')
     sodra_conf_dir = os.path.join(cassandra_conf_dir, 'sodra_conf')
     if os.path.exists(sodra_conf_dir):
-        raise Exception('Remove "sodra_conf" directory from cassandra conf directory')
+        logging.info('sodra conf directory already exists. skipping ...')
+        return
     logging.info('Copying sodra conf from ' + sodra_conf_install_dir + ' to ' + sodra_conf_dir)
     shutil.copytree(sodra_conf_install_dir, sodra_conf_dir)
 
 def setup_sodra_data_dir(cassandra_data_dir, sodra_install_dir):
     sodra_data_dir = os.path.join(cassandra_data_dir, 'sodra')
     if os.path.exists(sodra_data_dir):
-        raise Exception('Previous stale "sodra" directory exists inside : ' + cassandra_data_dir + ' . Delete that directory')
+        logging.info('sodra data directory already exists. skipping ...')
+        return
     logging.info('Creating sodra data dir : ' + sodra_data_dir)
     os.makedirs(sodra_data_dir)
             
@@ -129,7 +132,7 @@ def parseargs(args):
     
 if __name__ == '__main__':
     options = parseargs(sys.argv[1:])
-    logging.basicConfig(filename='/docker.setup.log', level=logging.INFO)
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     log_options(options)
     if options.remove:
         delete_sodra(options)
