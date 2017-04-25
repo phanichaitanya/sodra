@@ -21,7 +21,7 @@ Sodra is Cassandra + Solr together running in the same JVM so that you don't nee
 
 ## Build
 
-> ./gradlew sodra-backend:shadowJar
+> ./gradlew build
 
 ## Distribution
 
