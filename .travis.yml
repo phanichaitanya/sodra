@@ -3,7 +3,7 @@ jdk: oraclejdk7
 before_install:
   - pip install --user codecov
 script: 
-  - ./gradlew sodra-backend:build
+  - ./gradlew build
   - ./gradlew codeCoverageReport
 after_success:
   - bash <(curl -s https://codecov.io/bash)

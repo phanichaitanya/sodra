@@ -6,11 +6,11 @@ import java.nio.file.Path;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.runners.JUnit4;
 
 /*
  * Copyright Phani Chaitanya Vempaty
@@ -30,12 +30,15 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ SodraUtils.class })
+@RunWith(JUnit4.class)
 public class SodraUtilsTest {
+
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     @Before
     public void setUp() throws Exception {
+        this.environmentVariables.set(SodraConstants.SODRA_DATA_DIR, "/home/sodra/data");
     }
 
     @After
@@ -44,10 +47,14 @@ public class SodraUtilsTest {
 
     @Test
     public void testSolrHome() {
-        PowerMockito.mockStatic(System.class);
-        PowerMockito.when(System.getenv(SodraConstants.SODRA_DATA_DIR)).thenReturn("/home/sodra/data/");
         Path solrHome = SodraUtils.getSolrHome();
         assertEquals("/home/sodra/data/solr", solrHome.toString());
+    }
+
+    @Test
+    public void testSolrCorePath() {
+        Path corePath = SodraUtils.getSolrCorePath(SodraUtils.getSolrHome(), "testIndex");
+        assertEquals("/home/sodra/data/solr/testIndex", corePath.toString());
     }
 
 }
