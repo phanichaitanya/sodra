@@ -1,0 +1,20 @@
+CREATE KEYSPACE IF NOT EXISTS sodra  
+	WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
+	
+CREATE TABLE IF NOT EXISTS sodra.jobs ( 
+	job_id int PRIMARY KEY, 
+	agency text, 
+	job_title text, 
+	salary decimal,
+	location text,
+	job_description text,
+	qualifications text,
+	skills text,
+	posting_date timestamp 
+);
+
+COPY sodra.jobs(job_id,agency,job_title,salary,location,job_description,qualifications,skills,
+posting_date) from 'Jobs.csv' with HEADER = true AND CHUNKSIZE=10;
+
+CREATE CUSTOM INDEX IF NOT EXISTS job_idx ON sodra.jobs(job_description) 
+	USING 'org.hara.sodra.index.SodraIndex';

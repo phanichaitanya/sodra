@@ -43,3 +43,5 @@ Once you are in the docker container:
 > cd /sodra_install/examples
 
 > cqlsh -f users
+
+> cqlsh -f jobs

@@ -55,9 +55,7 @@ public class CassandraToSodraTypeMapper {
 			return "tdate";
 		} else if (cassandraType.getClass() == DoubleType.class) {
 			return "double";
-		} else if (cassandraType.getClass() == FloatType.class) {
-			return "float";
-		}
+		} 
 		return "text_general";
 	}
 
