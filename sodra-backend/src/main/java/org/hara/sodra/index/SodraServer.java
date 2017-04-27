@@ -41,7 +41,9 @@ import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
 import org.apache.cassandra.db.composites.CellName;
 import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.DecimalType;
 import org.apache.cassandra.db.marshal.Int32Type;
+import org.apache.cassandra.db.marshal.TimestampType;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -209,6 +211,10 @@ public class SodraServer {
 						composedValue = ((Int32Type) type).compose(value);
 					} else if (type.asCQL3Type() == CQL3Type.Native.TEXT) {
 						composedValue = ((UTF8Type) type).compose(value);
+					} else if (type.asCQL3Type() == CQL3Type.Native.TIMESTAMP) {
+					    composedValue = ((TimestampType) type).compose(value);
+					} else if (type.asCQL3Type() == CQL3Type.Native.DECIMAL) {
+					    composedValue = ((DecimalType) type).compose(value);
 					}
 					doc.addField(fieldName, composedValue);
 				}
