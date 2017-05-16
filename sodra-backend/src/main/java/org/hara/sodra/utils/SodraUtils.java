@@ -65,17 +65,4 @@ public class SodraUtils {
 		FileUtils.deleteDirectory(corePath.toFile());
 	}
 
-	public static void main(String[] args) {
-		String sodraDataDir = System.getenv("SODRA_DATA_DIR");
-		if (sodraDataDir == null) {
-			throw new RuntimeException("SODRA_DATA_DIR environment variable is not defined");
-		}
-		Path solrHome = Paths.get(sodraDataDir, "solr");
-		try {
-			createSolrCoreDirs(solrHome, "tmp");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 }
