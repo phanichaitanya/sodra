@@ -5,7 +5,8 @@ LABEL maintainer "Phani Chaitanya Vempaty"
 # install necessary components
 RUN apt-get -qq update \
         && apt-get install -y python-yaml \
-        && apt-get install -y vim
+        && apt-get install -y vim \
+        && apt-get install -y curl
 
 # add sodra artifacts to the docker image
 RUN mkdir -p /sodra_install

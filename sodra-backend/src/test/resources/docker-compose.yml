@@ -1,0 +1,12 @@
+version: '3'
+services:
+  sodra:
+    image: "sodra:latest"
+    tty: true
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -u cassandra -p cassandra 127.0.0.1 < /dev/null"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    ports:
+      - "9042:9042"

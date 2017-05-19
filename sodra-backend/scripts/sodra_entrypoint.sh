@@ -17,7 +17,7 @@ fi
 #	exec gosu cassandra "$BASH_SOURCE" "$@"
 #fi
 
-if [ "$1" = 'sodra_docker' ]; then
+if [ "$1" = 'bash' ]; then
 	: ${CASSANDRA_RPC_ADDRESS='0.0.0.0'}
 
 	: ${CASSANDRA_LISTEN_ADDRESS='auto'}
