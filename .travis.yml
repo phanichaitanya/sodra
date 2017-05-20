@@ -10,6 +10,7 @@ addons:
       - lynx
 before_install:
   - pip install --user codecov
+  - docker pull redragons/sodra:latest
 script: 
   - ./gradlew build
   - ./gradlew codeCoverageReport
