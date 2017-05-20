@@ -1,7 +1,7 @@
 version: '3'
 services:
   sodra:
-    image: "sodra:latest"
+    image: "redragons/sodra:latest"
     tty: true
     healthcheck:
       test: ["CMD-SHELL", "cqlsh -u cassandra -p cassandra 127.0.0.1 < /dev/null"]
