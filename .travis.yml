@@ -10,9 +10,14 @@ addons:
       - lynx
 before_install:
   - pip install --user codecov
+  - docker --version
+  - sudo apt-get update
+  - docker --version
   - docker pull redragons/sodra:latest
   - docker-compose --version
-  - sudo curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+  - sudo curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin/docker-compose
   - docker-compose --version
 script: 
   - ./gradlew build --debug
