@@ -12,8 +12,8 @@ before_install:
   - pip install --user codecov
   - docker pull redragons/sodra:latest
 script: 
-  - ./gradlew build
-  - ./gradlew codeCoverageReport
+  - ./gradlew build --debug
+  - ./gradlew codeCoverageReport --debug
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 after_failure:
