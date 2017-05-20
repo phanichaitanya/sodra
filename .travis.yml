@@ -5,6 +5,10 @@ jdk:
   - oraclejdk8
 services:
   - docker
+addons:
+  apt:
+    packages:
+      - lynx
 before_install:
   - pip install --user codecov
 script: 
@@ -12,3 +16,5 @@ script:
   - ./gradlew codeCoverageReport
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+after_failure:
+  - if [ -f /home/travis/build/redragons/sodra/sodra-backend/build/reports/tests/test/index.html ]; then lynx -dump /home/travis/build/redragons/sodra/sodra-backend/build/reports/tests/test/index.html; fi
