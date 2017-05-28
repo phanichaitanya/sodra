@@ -5,6 +5,10 @@ allprojects{
     targetCompatibility = '1.7'
 }   
 
+configurations {
+    jacocoAgent
+}
+
 repositories {
     mavenCentral()
     maven {
@@ -16,6 +20,7 @@ dependencies {
     compile group: 'org.apache.cassandra', name: 'cassandra-all', version: '2.2.2'
     compile group: 'org.apache.solr', name: 'solr-core', version: '5.3.1'
     compile group: 'org.yaml', name: 'snakeyaml', version: '1.11'
+    jacocoAgent 'org.jacoco:org.jacoco.agent:0.7.9'
 }
 
 jacocoTestReport {
@@ -40,6 +45,25 @@ task codeCoverageReport(type: JacocoReport) {
     }
 }
 
+// following task useful for copying jacoco agent jar to java classpath for test coverage
+task unzipJacocoAgent {
+    doLast {
+        def jacocoAgentPath = configurations.jacocoAgent.resolve().first()
+        copy {
+            from zipTree(jacocoAgentPath)
+            into "$buildDir/jacocoagent/unpacked"
+        }
+        copy {
+            from "$buildDir/jacocoagent/unpacked/jacocoagent.jar"
+            into "$buildDir/jacocoagent"
+        }
+        delete "$buildDir/jacocoagent/unpacked"
+    }
+}
+
 codeCoverageReport.dependsOn {
     subprojects*.test
 }
+
+build.dependsOn unzipJacocoAgent
+test.dependsOn unzipJacocoAgent
