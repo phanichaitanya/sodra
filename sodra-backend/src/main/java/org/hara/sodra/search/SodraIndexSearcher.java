@@ -19,11 +19,11 @@
 
 package org.hara.sodra.search;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.db.ColumnFamily;
 import org.apache.cassandra.db.DecoratedKey;
@@ -40,55 +40,54 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.hara.sodra.index.SodraServer;
 
-import com.google.common.collect.Lists;
-
 /**
  * @author Phani Chaitanya Vempaty
- *
  */
 public class SodraIndexSearcher extends SecondaryIndexSearcher {
 
-	private SodraServer sodraServer;
+  private SodraServer sodraServer;
 
-	public SodraIndexSearcher(SecondaryIndexManager indexManager, Set<ByteBuffer> columns, SodraServer sodraServer) {
-		super(indexManager, columns);
-		this.sodraServer = sodraServer;
-	}
+  public SodraIndexSearcher(SecondaryIndexManager indexManager, Set<ByteBuffer> columns,
+      SodraServer sodraServer) {
+    super(indexManager, columns);
+    this.sodraServer = sodraServer;
+  }
 
-	@Override
-	public List<Row> search(ExtendedFilter filter) {
-		List<Row> rows = Lists.newArrayList();
-		IndexExpression indexExpression = filter.getClause().get(0);
-		String query = UTF8Type.instance.compose(indexExpression.value);
-		try {
-			SolrDocumentList results = sodraServer.search(query);
-			ColumnDefinition idColumn = sodraServer.getIdColumn();
-			if (idColumn == null) {
-				throw new IOException("No id column for index : " + sodraServer.getIndexName());
-			}
-			String idField = idColumn.name.toString();
-			for (SolrDocument doc : results) {
-				Integer id = (Integer) doc.getFieldValue(idField);
-				ByteBuffer decomposedId = Int32Type.instance.decompose(id);
-				DecoratedKey decorateKey = baseCfs.partitioner.decorateKey(decomposedId);
-				QueryFilter queryFilter = QueryFilter.getIdentityFilter(decorateKey, sodraServer.getIndexName(),
-						filter.timestamp);
-				ColumnFamily columnFamily = baseCfs.getColumnFamily(queryFilter);
-				if (columnFamily == null) {
-					continue;
-				}
-				Row row = new Row(decomposedId, columnFamily);
-				rows.add(row);
-			}
-		} catch (SolrServerException | IOException e) {
-			e.printStackTrace();
-		}
-		return rows;
-	}
+  @Override
+  public List<Row> search(ExtendedFilter filter) {
+    List<Row> rows = Lists.newArrayList();
+    IndexExpression indexExpression = filter.getClause().get(0);
+    String query = UTF8Type.instance.compose(indexExpression.value);
+    try {
+      SolrDocumentList results = sodraServer.search(query);
+      ColumnDefinition idColumn = sodraServer.getIdColumn();
+      if (idColumn == null) {
+        throw new IOException("No id column for index : " + sodraServer.getIndexName());
+      }
+      String idField = idColumn.name.toString();
+      for (SolrDocument doc : results) {
+        Integer id = (Integer) doc.getFieldValue(idField);
+        ByteBuffer decomposedId = Int32Type.instance.decompose(id);
+        DecoratedKey decorateKey = baseCfs.partitioner.decorateKey(decomposedId);
+        QueryFilter queryFilter = QueryFilter
+            .getIdentityFilter(decorateKey, sodraServer.getIndexName(),
+                filter.timestamp);
+        ColumnFamily columnFamily = baseCfs.getColumnFamily(queryFilter);
+        if (columnFamily == null) {
+          continue;
+        }
+        Row row = new Row(decomposedId, columnFamily);
+        rows.add(row);
+      }
+    } catch (SolrServerException | IOException e) {
+      e.printStackTrace();
+    }
+    return rows;
+  }
 
-	@Override
-	public List<Row> postReconciliationProcessing(List<IndexExpression> clause, List<Row> rows) {
-		return rows;
-	}
+  @Override
+  public List<Row> postReconciliationProcessing(List<IndexExpression> clause, List<Row> rows) {
+    return rows;
+  }
 
 }

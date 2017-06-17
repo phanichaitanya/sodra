@@ -22,7 +22,6 @@ package org.hara.sodra.index;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
-
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.Schema;
 import org.apache.cassandra.db.ColumnFamily;
@@ -41,109 +40,109 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Phani Chaitanya Vempaty
- *
  */
 public class SodraIndex extends PerRowSecondaryIndex {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(SodraIndex.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SodraIndex.class);
 
-	private String indexName;
+  private String indexName;
 
-	private IPartitioner partitioner;
+  private IPartitioner partitioner;
 
-	private CFMetaData metadata;
+  private CFMetaData metadata;
 
-	private SodraServer sodraServer;
+  private SodraServer sodraServer;
 
-	@Override
-	public void index(ByteBuffer rowKey, ColumnFamily cf) {
-		System.out.println("Getting index call");
-		DecoratedKey decorateKey = this.partitioner.decorateKey(rowKey);
-		try {
-			this.sodraServer.index(decorateKey, cf);
-		} catch (SolrServerException | IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+  @Override
+  public void index(ByteBuffer rowKey, ColumnFamily cf) {
+    System.out.println("Getting index call");
+    DecoratedKey decorateKey = this.partitioner.decorateKey(rowKey);
+    try {
+      this.sodraServer.index(decorateKey, cf);
+    } catch (SolrServerException | IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	@Override
-	public void delete(DecoratedKey key, Group opGroup) {
-		try {
-			// TODO: test the delete document
-			this.sodraServer.delete(key);
-		} catch (SolrServerException | IOException e) {
-			e.printStackTrace();
-		}
-	}
+  @Override
+  public void delete(DecoratedKey key, Group opGroup) {
+    try {
+      // TODO: test the delete document
+      this.sodraServer.delete(key);
+    } catch (SolrServerException | IOException e) {
+      e.printStackTrace();
+    }
+  }
 
-	@Override
-	public void init() {
-		LOGGER.info("Initializing Sodra Index");
-		this.indexName = this.baseCfs.name;
-		this.partitioner = this.baseCfs.partitioner;
-		this.metadata = Schema.instance.getCFMetaData(this.baseCfs.keyspace.getName(), this.baseCfs.name);
-		this.sodraServer = new SodraServer(this.metadata);
-		try {
-			// do not create the index if it already exists ?
-			this.sodraServer.createIndex(this.indexName, this.baseCfs.metadata.allColumns());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+  @Override
+  public void init() {
+    LOGGER.info("Initializing Sodra Index");
+    this.indexName = this.baseCfs.name;
+    this.partitioner = this.baseCfs.partitioner;
+    this.metadata = Schema.instance
+        .getCFMetaData(this.baseCfs.keyspace.getName(), this.baseCfs.name);
+    this.sodraServer = new SodraServer(this.metadata);
+    try {
+      // do not create the index if it already exists ?
+      this.sodraServer.createIndex(this.indexName, this.baseCfs.metadata.allColumns());
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 
-	@Override
-	public void reload() {
-	}
+  @Override
+  public void reload() {
+  }
 
-	@Override
-	public void validateOptions() throws ConfigurationException {
-	}
+  @Override
+  public void validateOptions() throws ConfigurationException {
+  }
 
-	@Override
-	public String getIndexName() {
-		return this.indexName;
-	}
+  @Override
+  public String getIndexName() {
+    return this.indexName;
+  }
 
-	@Override
-	protected SecondaryIndexSearcher createSecondaryIndexSearcher(Set<ByteBuffer> columns) {
-		return new SodraIndexSearcher(this.baseCfs.indexManager, columns, this.sodraServer);
-	}
+  @Override
+  protected SecondaryIndexSearcher createSecondaryIndexSearcher(Set<ByteBuffer> columns) {
+    return new SodraIndexSearcher(this.baseCfs.indexManager, columns, this.sodraServer);
+  }
 
-	@Override
-	public void forceBlockingFlush() {
-		// TODO: issue a commit on solr index
-	}
+  @Override
+  public void forceBlockingFlush() {
+    // TODO: issue a commit on solr index
+  }
 
-	@Override
-	public ColumnFamilyStore getIndexCfs() {
-		return this.baseCfs;
-	}
+  @Override
+  public ColumnFamilyStore getIndexCfs() {
+    return this.baseCfs;
+  }
 
-	@Override
-	public void removeIndex(ByteBuffer columnName) {
-		try {
-			this.sodraServer.deleteIndex(this.indexName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+  @Override
+  public void removeIndex(ByteBuffer columnName) {
+    try {
+      this.sodraServer.deleteIndex(this.indexName);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
-	@Override
-	public void invalidate() {
-	}
+  @Override
+  public void invalidate() {
+  }
 
-	@Override
-	public void truncateBlocking(long truncatedAt) {
-	}
+  @Override
+  public void truncateBlocking(long truncatedAt) {
+  }
 
-	@Override
-	public boolean indexes(CellName name) {
-		return true;
-	}
+  @Override
+  public boolean indexes(CellName name) {
+    return true;
+  }
 
-	@Override
-	public long estimateResultRows() {
-		return 1;
-	}
+  @Override
+  public long estimateResultRows() {
+    return 1;
+  }
 
 }

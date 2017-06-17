@@ -21,12 +21,11 @@ package org.hara.sodra;
 
 /**
  * @author Phani Chaitanya Vempaty
- *
  */
 public class SodraConfig {
-	
-	public Integer solr_port = 8983;
-	
-	public String solr_host = "127.0.0.1";
-	
+
+  public Integer solr_port = 8983;
+
+  public String solr_host = "127.0.0.1";
+
 }

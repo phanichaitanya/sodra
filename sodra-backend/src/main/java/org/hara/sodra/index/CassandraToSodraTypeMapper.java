@@ -34,29 +34,31 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 
 /**
  * @author Phani Chaitanya Vempaty
- *
  */
 public class CassandraToSodraTypeMapper {
 
-	public static String getSolrType(AbstractType<?> cassandraType) {
-		if (cassandraType.getClass() == BooleanType.class) {
-			return "boolean";
-		} else if (cassandraType.getClass() == UTF8Type.class) {
-			return "text_en";
-		} else if (cassandraType.getClass() == Int32Type.class || cassandraType.getClass() == IntegerType.class) {
-			return "int";
-		} else if (cassandraType.getClass() == LongType.class) {
-			return "long";
-		} else if (cassandraType.getClass() == ByteType.class || cassandraType.getClass() == BytesType.class) {
-			return "binary";
-		} else if (cassandraType.getClass() == FloatType.class) {
-			return "float";
-		} else if (cassandraType.getClass() == DateType.class || cassandraType.getClass() == TimestampType.class) {
-			return "tdate";
-		} else if (cassandraType.getClass() == DoubleType.class) {
-			return "double";
-		} 
-		return "text_general";
-	}
+  public static String getSolrType(AbstractType<?> cassandraType) {
+    if (cassandraType.getClass() == BooleanType.class) {
+      return "boolean";
+    } else if (cassandraType.getClass() == UTF8Type.class) {
+      return "text_en";
+    } else if (cassandraType.getClass() == Int32Type.class
+        || cassandraType.getClass() == IntegerType.class) {
+      return "int";
+    } else if (cassandraType.getClass() == LongType.class) {
+      return "long";
+    } else if (cassandraType.getClass() == ByteType.class
+        || cassandraType.getClass() == BytesType.class) {
+      return "binary";
+    } else if (cassandraType.getClass() == FloatType.class) {
+      return "float";
+    } else if (cassandraType.getClass() == DateType.class
+        || cassandraType.getClass() == TimestampType.class) {
+      return "tdate";
+    } else if (cassandraType.getClass() == DoubleType.class) {
+      return "double";
+    }
+    return "text_general";
+  }
 
 }
